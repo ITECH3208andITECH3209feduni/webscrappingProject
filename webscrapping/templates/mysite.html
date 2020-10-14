@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Scrapping Demo</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+</head>
+<body>
+<style>
+#loader{
+z-index:999999;
+display:block;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:url("{% static 'images/pageLoader.gif' %}") 50% 50% no-repeat #cccccc;
+}
+
+nav > .nav.nav-tabs{
+
+  border: none;
+    color:#fff;
+    background:#272e38;
+    border-radius:0;
+
+}
+nav > div a.nav-item.nav-link,
+nav > div a.nav-item.nav-link.active
+{
+  border: none;
+    padding: 18px 25px;
+    color:#fff;
+    background:#272e38;
+    border-radius:0;
+}
+
+nav > div a.nav-item.nav-link.active:after
+ {
+  content: "";
+  position: relative;
+  bottom: -60px;
+  left: -10%;
+  border: 15px solid transparent;
+  border-top-color: #e74c3c ;
+}
+.tab-content{
+  background: #fdfdfd;
+    line-height: 25px;
+    border: 1px solid #ddd;
+    border-top:5px solid #e74c3c;
+    border-bottom:5px solid #e74c3c;
+    padding:30px 25px;
+}
+
+nav > div a.nav-item.nav-link:hover,
+nav > div a.nav-item.nav-link:focus
+{
+  border: none;
+    background: #e74c3c;
+    color:#fff;
+    border-radius:0;
+    transition:background 0.20s linear;
+}
+</style>
+<div id="loader"></div>
+  <div class="container" style="margin: 5%;">
+  <div class="container">
+    <form class="form-inline" action="" method="post">
+      {% csrf_token %}
+      <div class="form-group mx-sm-12 mb-2">
+        <label for="url" class="sr-only">URL</label>
+        <input type="text" name="url" class="form-control" id="url" placeholder="enter url here" required>
+      </div>
+        <button type="submit" id="btn-one" class="btn btn-primary">Send</button>
+    </form>
+  </div>
+  <div class=" container table-responsive" style="margin-top: 5%;">
+    <h1>Sport Grant Records</h1>
+  <!--Table-->
+      {% if tables %}
+      <div class="container">
+              <div class="row">
+                  <div class="col-xs-1 "></div>
+                <div class="col-xs-10 ">
+                  <nav>
+                    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                    {% for table in tables %}
+                        {% if table.0 == 'Table_1' %}
+                      <a class="nav-item nav-link active" id="nav-{{ table.0 }}-tab" data-toggle="tab" href="#{{ table.0 }}" role="tab" aria-controls="{{ table.0 }}" aria-selected="true">{{ table.0 }}</a>
+                        {% else %}
+                        <a class="nav-item nav-link" id="nav-{{ table.0 }}-tab" data-toggle="tab" href="#{{ table.0 }}" role="tab" aria-controls="{{ table.0 }}" aria-selected="true">{{ table.0 }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                  </nav>
+                  <div class="tab-content py-3 px-3 px-sm-0" id="nav-tabContent">
+                      {% for table in tables %}
+                      {% if table.0 == 'Table_1' %}
+                    <div class="tab-pane fade show active" id="{{ table.0 }}" role="tabpanel" aria-labelledby="nav-{{ table.0 }}-tab">
+                        <!--<p>{{ table.0 }}</p>-->
+
+                       <table id="example-{{ table.0 }}" class="display nowrap" style="width:100%">
+        <thead>
+            <tr>
+                {% for head in table.1 %}
+                <th class="th-sm">{{ head }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in table.2 %}
+            <tr>
+              {% for dat in data %}
+                {% if 'https' in dat %}
+                    <td><img src="{{ dat }}"></td>
+                {% else %}
+                    <td>{{ dat }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+      {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                {% for head in header %}
+                <th class="th-sm">{{ head }}</th>
+                {% endfor %}
+            </tr>
+        </tfoot>
+    </table>
+
+                    </div>
+                      {% else %}
+                    <div class="tab-pane fade" id="{{ table.0 }}" role="tabpanel" aria-labelledby="nav-{{ table.0 }}-tab">
+                        <!--<p>{{ table.0 }}</p>-->
+
+                       <table id="example-{{ table.0 }}" class="display nowrap" style="width:100%">
+        <thead>
+            <tr>
+                {% for head in table.1 %}
+                <th class="th-sm">{{ head }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in table.2 %}
+            <tr>
+              {% for dat in data %}
+                <td>{{ dat }}</td>
+              {% endfor %}
+            </tr>
+      {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                {% for head in header %}
+                <th class="th-sm">{{ head }}</th>
+                {% endfor %}
+            </tr>
+        </tfoot>
+    </table>
+
+                    </div>
+                      {% endif %}
+                      {% endfor %}
+                  </div>
+
+                </div>
+                  <div class="col-xs-1 "></div>
+              </div>
+        </div>
+      {% endif %}
+      </div>
+</div>
+
+
+  </div>
+    <div>
+        {% if pdf %}
+        <h1>PDF FILES</h1>
+            {% for pdfs in pdf %}
+                <a href="{{ pdfs.1 }}" target = "_blank">{{ pdfs.0 }}</a>
+        <br>
+            {% endfor %}
+        {% endif %}
+        <br><br>
+        {% if docx %}
+        <h1>Document FILES</h1>
+        {% for dox in docx %}
+            <a href="{{ dox.1 }}" target = "_blank">{{ dox.0 }}</a>
+        <br>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+
+$(function(){ // this replaces document.ready
+  $(window).on("load", function(){
+    $('#loader').fadeOut('slow', function() {
+
+    });
+  });
+});
+$(function(){ // this replaces document.ready
+  $('#btn-one').on("click", function(){
+    $('#btn-one').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').addClass('disabled');
+  });
+});
+
+  $(document).ready(function() {
+  {% for table in tables %}
+    $('#example-{{ table.0 }}').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
+    } );
+   {% endfor %}
+} );
+
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.flash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+</body>
+</html>
